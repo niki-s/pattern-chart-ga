@@ -4,12 +4,14 @@ import sys
 import pickle
 from individual import Individual
 import numpy as np
+import os.path
+import time
 
 # CHROMSIZE_ROW = 5
 # CHROMSIZE_COL = 5
 NUMCOLORS = 2
-POPSIZE = 5
-GENERATIONS = 4
+POPSIZE = 10
+GENERATIONS = 40
 SEED = 41
 
 def initPop():
@@ -28,10 +30,16 @@ def evaluate(population):
 		generateCA(individual.chrom, str(currentFile))
 		currentFile += 1
 
-	# then wait for feedback and update fitness
+	# then wait for the appropriate feedback file to get created
+	while not os.path.exists("feedback"):
+		print "waiting for feedback"
+		time.sleep(1)
+
 	for individual in population:
 		individual.fitness = random.randint(0,10)
-		#return True
+
+	os.remove("feedback")
+
 def crossover(Px, Pm, p1, p2):
 	# make children with appropriate length
 	child1 = [0] * len(p1)
@@ -82,6 +90,21 @@ def getRandomIndividual(population):
 	ind = random.randint(0, POPSIZE-1)
 	return population[ind]
 
+def avgFitness(population):
+	totalFit = 0.0
+	for individual in population:
+		totalFit += individual.fitness
+
+	return totalFit/float(POPSIZE)
+
+def maxFitness(population):
+	currentMax = 0
+	for individual in population:
+		if individual.fitness > currentMax:
+			currentMax = individual.fitness
+
+	return currentMax
+
 def generateCA(testrules, outfile):
 	#testrules = [1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0]
 	defaultColor = 0
@@ -105,7 +128,7 @@ def generateCA(testrules, outfile):
 						if (previousLine[0] == test[0]) and (previousLine[1] == test[1]) and (previousLine[2] == test[2]):
 							mat[i][j] = rule[0]
 
-	print mat
+	# print mat
 	f = open(outfile, 'w+')
 	for i in range(10):
 		for j in range(10):
@@ -117,18 +140,19 @@ def main():
 	random.seed(SEED)
 	Px = .8
 	Pm = .3
+	outData = []
 
 	# create initial population with random strings
 	pop = initPop()
 
 	# test print
-	for ind in pop:
-		print ind.chrom
+	# for ind in pop:
+	# 	print ind.chrom
 
 	#get fitnesses for population
 	evaluate(pop)
-	for ind in pop:
-		print ind.fitness
+	# for ind in pop:
+	# 	print ind.fitness
 
 	# # reproduce, double population via random selection and etc, for each generation
 	for i in range(GENERATIONS):
@@ -163,13 +187,14 @@ def main():
 		# 	print ind.fitness
 
 	# 	# append new generation info to out data
-	# 	genInfo = [i, minDistance(pop), avgDistance(pop), maxDistance(pop)]
+		print i
+		genInfo = [i, avgFitness(pop), maxFitness(pop)]
 	# 	if i % 50 == 0:
 	# 		print genInfo
 
-	# 	outData.append(genInfo)
+		outData.append(genInfo)
 
-	# pickle.dump(outData, open(saveFile, 'w'))
+	pickle.dump(outData, open("saveFile", 'w+'))
 
 	# for ind in pop:
 	# 	print ind.fitness
