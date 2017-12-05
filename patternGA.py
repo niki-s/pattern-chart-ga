@@ -10,7 +10,7 @@ import time
 
 # CHROMSIZE_ROW = 5
 # CHROMSIZE_COL = 5
-NUMCOLORS = 3
+NUMCOLORS = 2
 POPSIZE = 30
 GENERATIONS = 5
 SEED = 41
@@ -42,7 +42,7 @@ def evaluate(indexes, population):
 	f = open("/home/niki/Downloads/result.txt", 'r')
 	fitnessUpdates = f.read()
 	fitnessUpdates = fitnessUpdates.strip().split(',')
-	print fitnessUpdates
+	# print fitnessUpdates
 	fitIndex = 0
 
 	countSelected = indexes.count(1)
@@ -159,7 +159,7 @@ def generateCA(testrules, outfile):
 						if (previousLine[0] == test[0]) and (previousLine[1] == test[1]) and (previousLine[2] == test[2]):
 							mat[i][j] = rule[0]
 
-	print outfile
+	# print outfile
 	f = open("./GA/app/Patterns/"+outfile+".txt", 'w+')
 	for i in range(CASIZE):
 		for j in range(CASIZE):
@@ -207,8 +207,8 @@ def main():
 	pop = initPop()
 
 	# test print
-	for ind in pop:
-		print ind.chrom
+	# for ind in pop:
+	# 	print ind.chrom
 
 	#get fitnesses for population
 	# evaluate(pop)
@@ -269,6 +269,9 @@ def main():
 	# for ind in pop:
 	# 	print ind.fitness
 	pop.sort(key=lambda individual:individual.fitness, reverse=True)
+	for i in pop:
+		print i.fitness
+	print "top individual"
 	print pop[0].chrom
 
 if __name__ == '__main__':
