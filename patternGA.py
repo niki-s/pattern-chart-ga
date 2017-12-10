@@ -7,12 +7,13 @@ from individual import Individual
 import numpy as np
 import os.path
 import time
+from scipy import spatial
 
 # CHROMSIZE_ROW = 5
 # CHROMSIZE_COL = 5
 NUMCOLORS = 2
 POPSIZE = 30
-GENERATIONS = 5
+GENERATIONS = 8
 SEED = 41
 CASIZE = 25
 seedRow = []
@@ -63,6 +64,64 @@ def evaluate(indexes, population):
 
 	f.close()
 	os.remove("/home/niki/Downloads/result.txt")
+
+def evaluateHam(indexes, population):
+	# get the fitness of each individual in the population
+	# do user input here
+	currentFile = 0
+	for i in indexes:
+		# first make a CA from each of the individual's rules
+		generateCA(population[i].chrom, str(currentFile))
+		currentFile += 1
+
+	# then wait for the appropriate feedback file to get created
+	while not os.path.exists("/home/niki/Downloads/result.txt"):
+		print "waiting for feedback"
+		time.sleep(1)
+
+	print "GOT RESULTS"
+	f = open("/home/niki/Downloads/result.txt", 'r')
+	fitnessUpdates = f.read()
+	fitnessUpdates = fitnessUpdates.strip().split(',')
+	# print fitnessUpdates
+	fitIndex = 0
+
+	#countSelected = indexes.count(1)
+	reward = 1
+
+	for i in indexes:
+		if int(fitnessUpdates[fitIndex]) == 1:
+			population[i].fitness += reward
+			chosenRules = population[i].chrom
+		fitIndex+=1
+		
+	f.close()
+	os.remove("/home/niki/Downloads/result.txt")
+	
+	ruleset = [chosenRules[i:i + 4] for i in xrange(0, len(chosenRules), 4)]
+
+	for el in population:
+		comRuleset = [el.chrom[i:i + 4] for i in xrange(0, len(el.chrom), 4)]
+		hamDistTotal = calcHamming(ruleset, comRuleset)
+		print hamDistTotal
+
+		if hamDistTotal == 0:
+			el.fitness += 0
+		else:
+			el.fitness += hamDistTotal
+
+
+def calcHamming(ruleset1, ruleset2):
+	total = 0
+	for rule in ruleset1:
+		for compareRule in ruleset2:
+			#print rule, compareRule
+			if np.array_equal(rule, compareRule):
+				total += 1
+				break
+
+	return total
+
 
 def crossover(Px, Pm, p1, p2, p1Fit, p2Fit):
 	# make children with appropriate length
@@ -240,7 +299,7 @@ def main():
 
 			#print len(pop)
 		# eval new members of population
-		subset = fitnessPropSelectSubset(pop,12)
+		subset = fitnessPropSelectSubset(pop,9)
 		evaluate(subset, pop)
 
 		# sort pop in place based on highest fitness
@@ -273,6 +332,8 @@ def main():
 		print i.fitness
 	print "top individual"
 	print pop[0].chrom
+
+	generateCA(pop[0].chrom, "0")
 
 if __name__ == '__main__':
 	main()
