@@ -72,7 +72,7 @@ def main():
 
 	#plt.plot(gens, maxY, 'r', gens, avgY, 'b', gens, minY, 'g')
 	plt.plot(gens, avgY, 'b', gens, maxY, 'g')
-	plt.title(path)
+	plt.title('Fitness for 2-Color Test')
 	plt.ylabel('fitness')
 	plt.xlabel('generation')
 	plt.show()
